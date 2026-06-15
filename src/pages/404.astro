@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchCard from '../components/MatchCard.astro';
+import { getMatchData } from '../lib/data';
+
+const data = await getMatchData();
+const todayMatches = data.matches.slice(0, 8);
+---
+<Base
+  title="Partido No Encontrado — Pirlo TV"
+  description="Este partido ya terminó — pero hay más en vivo ahora en Pirlo TV."
+  canonical="https://partidosdehoy.live/404/"
+  noindex={true}
+>
+  <div class="error-page">
+    <h1>Este partido ya terminó</h1>
+    <p>Pero hay más partidos en vivo ahora mismo en Pirlo TV.</p>
+    <p><a href="/">← Volver al inicio</a></p>
+  </div>
+
+  {todayMatches.length > 0 && (
+    <div class="container" style="padding-bottom:48px">
+      <h2 class="section-title">Partidos en Vivo Ahora</h2>
+      <div class="match-grid">
+        {todayMatches.map((m) => <MatchCard match={m} />)}
+      </div>
+
+      <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:12px">
+        <a href="/futbol/">⚽ Fútbol</a>
+        <a href="/mundial-2026/">🏆 Mundial 2026</a>
+        <a href="/mlb/">⚾ MLB</a>
+        <a href="/nhl/">🏒 NHL</a>
+        <a href="/nba/">🏀 NBA</a>
+        <a href="/ufc/">🥊 UFC</a>
+        <a href="/pirlo-tv/">Pirlo TV</a>
+        <a href="/tarjeta-roja/">Tarjeta Roja</a>
+      </div>
+    </div>
+  )}
+</Base>

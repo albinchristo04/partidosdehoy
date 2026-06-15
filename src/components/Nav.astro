@@ -1,0 +1,27 @@
+---
+const pathname = Astro.url.pathname;
+function isActive(path: string) {
+  if (path === '/') return pathname === '/';
+  return pathname.startsWith(path);
+}
+const links = [
+  { href: '/pirlo-tv/', label: 'Pirlo TV' },
+  { href: '/mundial-2026/', label: 'Mundial 2026' },
+  { href: '/futbol/', label: 'Fútbol' },
+  { href: '/mlb/', label: 'MLB' },
+  { href: '/nhl/', label: 'NHL' },
+  { href: '/nba/', label: 'NBA' },
+  { href: '/ufc/', label: 'UFC' },
+  { href: '/motogp/', label: 'MotoGP' },
+  { href: '/tarjeta-roja/', label: 'Tarjeta Roja' },
+  { href: '/roja-directa-pirlo-tv/', label: 'Roja Directa' },
+];
+---
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">⚽ Pirlo TV</a>
+    {links.map((l) => (
+      <a href={l.href} class={`nav-link${isActive(l.href) ? ' active' : ''}`}>{l.label}</a>
+    ))}
+  </div>
+</nav>

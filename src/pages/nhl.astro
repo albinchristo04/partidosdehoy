@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['nhl'] ?? [];
+const meta = hubSeo('nhl', 'NHL', matches.length, '/nhl/');
+meta.title = 'NHL En Vivo — Stanley Cup 2026 en Directo Gratis | Pirlo TV';
+const faqs = hubFaq('NHL hockey', matches);
+const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'NHL', url: `${SITE_URL}/nhl/` }]), faqSchema(faqs)];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>NHL En Vivo — Stanley Cup 2026 en Directo</h1>
+    <p class="subtitle">Ver NHL en vivo gratis en Pirlo TV. Stanley Cup 2026 en directo. Pirlo TV NHL · Roja Directa Hockey.</p>
+    <MatchList matches={matches} emptyMessage="No hay partidos de NHL disponibles ahora mismo." />
+    <FaqBlock items={faqs} />
+    <SeoText html={`NHL Stanley Cup 2026 en vivo hoy en Pirlo TV. Ver hockey en directo gratis sin registro. <strong>pirlo tv nhl · roja directa nhl · stanley cup en vivo · ver hockey en vivo gratis</strong>`} />
+  </div>
+</Base>

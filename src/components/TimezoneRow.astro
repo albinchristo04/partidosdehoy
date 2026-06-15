@@ -1,0 +1,24 @@
+---
+import { applyOffset, TZ_OFFSETS } from '../lib/timezones';
+
+interface Props { timeUtc: string; }
+const { timeUtc } = Astro.props;
+
+const zones = [
+  { key: 'utc', label: 'UTC' },
+  { key: 'es', label: 'Madrid' },
+  { key: 'mx', label: 'CDMX' },
+  { key: 'co', label: 'Bogotá' },
+  { key: 'ar', label: 'Buenos Aires' },
+  { key: 'pt', label: 'Lisboa' },
+  { key: 'de', label: 'Berlín' },
+];
+---
+<div class="tz-row">
+  {zones.map((z, i) => (
+    <>
+      {i > 0 && ' · '}
+      <span>{applyOffset(timeUtc, TZ_OFFSETS[z.key].offset)}</span> {z.label}
+    </>
+  ))}
+</div>

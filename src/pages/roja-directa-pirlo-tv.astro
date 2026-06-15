@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { brandSeo } from '../lib/seo';
+
+const data = await getMatchData();
+const meta = brandSeo('roja-directa-pirlo-tv', '/roja-directa-pirlo-tv/');
+---
+<Base {...meta}>
+  <div class="hub-page">
+    <h1>Roja Directa Pirlo TV En Vivo — Ver Partidos Gratis</h1>
+    <p class="subtitle">Roja Directa Pirlo TV — la combinación perfecta. Ver todos los partidos de hoy en directo gratis.</p>
+    <MatchList matches={data.matches} />
+    <SeoText html={`<strong>Roja Directa Pirlo TV</strong> — RojaDirecta Pirlo — Pirlo TV Roja Directa. Ver deportes en vivo gratis. Mundial 2026, Fútbol, MLB, NBA, NHL, UFC. <strong>roja directa pirlo · rojadirecta pirlo tv · roja dirécta pirlo tv · roja directa pirlo tv en vivo</strong>`} />
+  </div>
+</Base>

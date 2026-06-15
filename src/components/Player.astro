@@ -1,0 +1,21 @@
+---
+import type { NormalizedMatch } from '../lib/types';
+import ChannelSelector from './ChannelSelector.astro';
+
+interface Props {
+  match: NormalizedMatch;
+}
+const { match: m } = Astro.props;
+const firstAvailable = m.channels.find((c) => c.available) ?? m.channels[0];
+const src = firstAvailable?.embedUrl ?? m.embedUrl;
+---
+<div class="player-wrap">
+  <iframe
+    id={`player-${m.id}`}
+    src={src}
+    allowfullscreen
+    allow="autoplay; fullscreen"
+    title={`${m.team1} vs ${m.team2} en vivo`}
+  ></iframe>
+</div>
+{m.channels.length > 0 && <ChannelSelector channels={m.channels} matchId={m.id} />}

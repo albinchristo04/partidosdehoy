@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData, getLeagueName } from '../lib/data';
+import { leagueSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
+import { SITE_URL } from '../lib/config';
+
+export async function getStaticPaths() {
+  const data = await getMatchData();
+  return Object.keys(data.byLeague).map((leagueSlug) => ({
+    params: { league: leagueSlug },
+  }));
+}
+
+const { league: leagueSlug } = Astro.params;
+const data = await getMatchData();
+const matches = data.byLeague[leagueSlug] ?? [];
+const leagueName = getLeagueName(leagueSlug);
+const meta = leagueSeo(leagueName, leagueSlug, matches.length);
+const faqs = hubFaq(leagueName, matches);
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Inicio', url: `${SITE_URL}/` },
+    { name: leagueName, url: `${SITE_URL}/${leagueSlug}/` },
+  ]),
+  faqSchema(faqs),
+  itemListSchema(`Partidos de ${leagueName} en vivo — Pirlo TV`, matches.map((m) => `${SITE_URL}/partido/${m.slug}/`)),
+];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <Breadcrumb crumbs={[{ name: 'Inicio', url: '/' }, { name: leagueName }]} />
+    <h1>{leagueName} En Vivo — Partidos Hoy Gratis</h1>
+    <p class="subtitle">Ver {leagueName} en vivo en Pirlo TV. {matches.length} partido(s) disponible(s) hoy en directo gratis.</p>
+    <MatchList matches={matches} emptyMessage={`No hay partidos de ${leagueName} disponibles ahora mismo.`} />
+    <FaqBlock items={faqs} />
+    <SeoText html={`Ver <strong>${leagueName}</strong> en vivo gratis en Pirlo TV — Roja Directa · Tarjeta Roja TV. Múltiples canales disponibles en español, inglés y portugués.`} />
+  </div>
+</Base>

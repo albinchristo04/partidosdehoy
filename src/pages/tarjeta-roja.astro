@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { brandSeo } from '../lib/seo';
+
+const data = await getMatchData();
+const meta = brandSeo('tarjeta-roja', '/tarjeta-roja/');
+---
+<Base {...meta}>
+  <div class="hub-page">
+    <h1>Tarjeta Roja TV En Vivo — Ver Partidos Gratis</h1>
+    <p class="subtitle">Tarjeta Roja TV en vivo. Ver todos los partidos de hoy en directo gratis en Pirlo TV.</p>
+    <MatchList matches={data.matches} />
+    <SeoText html={`<strong>Tarjeta Roja TV</strong> — Tarjeta Roja En Vivo — Tarjeta Roja Pirlo. Ver deportes en vivo hoy gratis. Mundial 2026, Fútbol, MLB, NBA, NHL, UFC disponibles. <strong>tarjeta roja mlb · tarjeta roja directa · tarjeta roja mundial 2026 · tarjeta roja pirlo tv</strong>`} />
+  </div>
+</Base>

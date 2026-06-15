@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['nba'] ?? [];
+const meta = hubSeo('nba', 'NBA', matches.length, '/nba/');
+const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'NBA', url: `${SITE_URL}/nba/` }])];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>NBA En Vivo Hoy — Baloncesto Gratis</h1>
+    <p class="subtitle">Ver NBA en vivo gratis en Pirlo TV. Pirlo TV NBA · Roja Directa NBA.</p>
+    <MatchList matches={matches} emptyMessage="No hay partidos de NBA disponibles ahora mismo." />
+  </div>
+</Base>

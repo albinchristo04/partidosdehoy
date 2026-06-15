@@ -1,0 +1,81 @@
+---
+import Base from '../../layouts/Base.astro';
+import Player from '../../components/Player.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import FaqBlock from '../../components/FaqBlock.astro';
+import TimezoneRow from '../../components/TimezoneRow.astro';
+import MatchCard from '../../components/MatchCard.astro';
+import { getMatchData } from '../../lib/data';
+import { matchSeo, sportsEventSchema, breadcrumbSchema, faqSchema as seoFaqSchema } from '../../lib/seo';
+import { matchFaq, faqSchema } from '../../lib/faq';
+import { formatDateEs } from '../../lib/timezones';
+import { SITE_URL } from '../../lib/config';
+
+export async function getStaticPaths() {
+  const data = await getMatchData();
+  return data.matches.map((m) => ({ params: { slug: m.slug }, props: { matchId: m.id } }));
+}
+
+const { slug } = Astro.params;
+const data = await getMatchData();
+const match = data.matches.find((m) => m.slug === slug);
+
+if (!match) {
+  return Astro.redirect('/404');
+}
+
+const meta = matchSeo(match);
+const faqs = matchFaq(match);
+const isWC = match.leagueSlug === 'copa-mundo-2026';
+const relatedMatches = data.matches.filter((m) => m.slug !== slug && (m.sport === match.sport || m.leagueSlug === match.leagueSlug)).slice(0, 6);
+
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Inicio', url: `${SITE_URL}/` },
+    { name: match.sport === 'futbol' ? 'Fútbol' : match.sport.toUpperCase(), url: `${SITE_URL}/${match.sportSlug}/` },
+    { name: match.league, url: `${SITE_URL}/${match.leagueSlug}/` },
+    { name: `${match.team1} vs ${match.team2}` },
+  ]),
+  sportsEventSchema(match),
+  faqSchema(faqs),
+];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="match-page">
+    <Breadcrumb crumbs={[
+      { name: 'Inicio', url: '/' },
+      { name: match.sport === 'futbol' ? 'Fútbol' : match.sport.toUpperCase(), url: `/${match.sportSlug}/` },
+      { name: match.league, url: `/${match.leagueSlug}/` },
+      { name: `${match.team1} vs ${match.team2}` },
+    ]} />
+
+    <h1>
+      {match.team1} vs {match.team2} En Vivo
+      {isWC ? '— Mundial 2026' : `— ${match.league}`}
+    </h1>
+
+    <div class="match-info">
+      <span>{match.league}</span> · <span>{formatDateEs(match.isoDateUtc)}</span> · <span>{match.timeUtc} UTC</span> · <span>{match.channels.length} canales</span>
+    </div>
+
+    <Player match={match} />
+
+    <TimezoneRow timeUtc={match.timeUtc} />
+
+    <FaqBlock items={faqs} />
+
+    {relatedMatches.length > 0 && (
+      <div class="more-matches">
+        <h2>Más Partidos Hoy</h2>
+        <ul class="more-list">
+          {relatedMatches.map((m) => (
+            <li>
+              <a href={`/partido/${m.slug}/`}>{m.team1} vs {m.team2}</a>
+              <span>{m.timeUtc} UTC</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+</Base>

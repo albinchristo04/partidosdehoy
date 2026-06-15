@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { brandSeo, websiteSchema } from '../lib/seo';
+
+const data = await getMatchData();
+const meta = brandSeo('pirlo-tv', '/pirlo-tv/');
+const schemas = [websiteSchema()];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>Pirlo TV En Vivo — Futbol y Deportes en Directo Gratis</h1>
+    <p class="subtitle">
+      Pirlo TV es el mejor lugar para ver partidos en vivo gratis. Fútbol, béisbol, baloncesto, NHL, UFC y más deportes
+      en directo con múltiples canales en español, inglés, portugués, alemán, francés e italiano.
+    </p>
+    <MatchList matches={data.matches} />
+    <SeoText html={`<strong>Pirlo TV</strong> — PirloTV — Pirlo TV en Vivo — Pirlo TV Gratis — Pirlo TV Online. Ver deportes en vivo hoy. Mundial 2026, Fútbol, MLB, NBA, NHL, UFC. Canales en español, inglés, portugués, alemán, francés e italiano. <strong>pirlotv · pirlo.tv · pirlo tv futbol en vivo · pirlo tv mundial 2026</strong>`} />
+  </div>
+</Base>

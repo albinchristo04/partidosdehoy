@@ -1,0 +1,55 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchList from '../../components/MatchList.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import SeoText from '../../components/SeoText.astro';
+import { getMatchData } from '../../lib/data';
+import { generateSlug } from '../../lib/slugs';
+import { SITE_URL, SITE_NAME } from '../../lib/config';
+
+export async function getStaticPaths() {
+  const MLB_TEAMS = [
+    'New York Yankees', 'Los Angeles Dodgers', 'San Diego Padres', 'Boston Red Sox',
+    'Houston Astros', 'Pittsburgh Pirates', 'Arizona Diamondbacks', 'Chicago Cubs',
+    'New York Mets', 'Atlanta Braves', 'Philadelphia Phillies', 'San Francisco Giants',
+    'Chicago White Sox', 'Detroit Tigers', 'Minnesota Twins', 'Cleveland Guardians',
+    'Toronto Blue Jays', 'Baltimore Orioles', 'Tampa Bay Rays', 'Seattle Mariners',
+    'Oakland Athletics', 'Los Angeles Angels', 'Texas Rangers', 'Kansas City Royals',
+    'Colorado Rockies', 'Miami Marlins', 'Milwaukee Brewers', 'Cincinnati Reds',
+    'St. Louis Cardinals', 'Washington Nationals',
+  ];
+  const data = await getMatchData();
+  const dynamicTeams = Object.keys(data.byTeam);
+  const allSlugs = new Set([
+    ...MLB_TEAMS.map((t) => generateSlug(t)),
+    ...dynamicTeams,
+  ]);
+  return [...allSlugs].map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const data = await getMatchData();
+const matches = data.byTeam[slug] ?? [];
+const teamDisplayName = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const title = `${teamDisplayName} En Vivo — Próximos Partidos · Pirlo TV | ${SITE_NAME}`;
+const desc = `Ver ${teamDisplayName} en vivo gratis en Pirlo TV. Todos los partidos de ${teamDisplayName} en directo. Pirlo TV ${teamDisplayName} · Roja Directa ${teamDisplayName}.`;
+const schemas = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: teamDisplayName, item: `${SITE_URL}/equipo/${slug}/` },
+    ],
+  },
+];
+---
+<Base title={title} description={desc} canonical={`${SITE_URL}/equipo/${slug}/`} schemas={schemas}>
+  <div class="team-page">
+    <Breadcrumb crumbs={[{ name: 'Inicio', url: '/' }, { name: teamDisplayName }]} />
+    <h1>{teamDisplayName} En Vivo — Pirlo TV</h1>
+    <p style="color:var(--muted);margin-bottom:20px">Ver todos los partidos de {teamDisplayName} en vivo gratis en Pirlo TV. Múltiples canales disponibles.</p>
+    <MatchList matches={matches} emptyMessage={`No hay partidos de ${teamDisplayName} disponibles ahora mismo.`} />
+    <SeoText html={`<strong>${teamDisplayName}</strong> en vivo en Pirlo TV. Ver todos los partidos de ${teamDisplayName} en directo gratis. <strong>pirlo tv ${teamDisplayName.toLowerCase()} · roja directa ${teamDisplayName.toLowerCase()} · ${teamDisplayName.toLowerCase()} en vivo gratis</strong>`} />
+  </div>
+</Base>

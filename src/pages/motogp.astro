@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['motogp'] ?? [];
+const meta = hubSeo('motogp', 'MotoGP', matches.length, '/motogp/');
+const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'MotoGP', url: `${SITE_URL}/motogp/` }])];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>MotoGP En Vivo Hoy — Ver Gratis</h1>
+    <p class="subtitle">Ver MotoGP en vivo gratis en Pirlo TV. Pirlo TV MotoGP · Roja Directa MotoGP.</p>
+    <MatchList matches={matches} emptyMessage="No hay carreras de MotoGP disponibles ahora mismo." />
+  </div>
+</Base>

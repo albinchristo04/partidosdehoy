@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['mlb'] ?? [];
+const meta = hubSeo('mlb', 'Béisbol', matches.length, '/beisbol/');
+meta.title = 'Béisbol en Vivo Hoy — MLB Gratis · Pirlo TV Béisbol | PirloTV';
+const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'Béisbol', url: `${SITE_URL}/beisbol/` }])];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>Béisbol En Vivo Hoy — MLB Gratis</h1>
+    <p class="subtitle">Ver béisbol en directo gratis en Pirlo TV. Pirlo TV Béisbol · Roja Directa Béisbol.</p>
+    <MatchList matches={matches} emptyMessage="No hay partidos de béisbol disponibles ahora mismo." />
+  </div>
+</Base>

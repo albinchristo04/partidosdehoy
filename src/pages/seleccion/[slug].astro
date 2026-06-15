@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchList from '../../components/MatchList.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import SeoText from '../../components/SeoText.astro';
+import { getMatchData } from '../../lib/data';
+import { seleccionSeo, breadcrumbSchema } from '../../lib/seo';
+import { generateSlug } from '../../lib/slugs';
+import { SITE_URL } from '../../lib/config';
+
+export async function getStaticPaths() {
+  const data = await getMatchData();
+  const wcMatches = (data.bySport['futbol'] ?? []).filter((m) => m.leagueSlug === 'copa-mundo-2026');
+  const teams = new Set<string>();
+  for (const m of wcMatches) {
+    if (m.team1) teams.add(m.team1);
+    if (m.team2) teams.add(m.team2);
+  }
+  return [...teams].map((team) => ({
+    params: { slug: generateSlug(team) },
+    props: { teamName: team },
+  }));
+}
+
+const { slug } = Astro.params;
+const { teamName } = Astro.props;
+const data = await getMatchData();
+const matches = data.byTeam[slug] ?? [];
+const meta = seleccionSeo(teamName, slug, matches.length);
+const schemas = [
+  breadcrumbSchema([
+    { name: 'Inicio', url: `${SITE_URL}/` },
+    { name: 'Mundial 2026', url: `${SITE_URL}/mundial-2026/` },
+    { name: teamName },
+  ]),
+];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="team-page">
+    <Breadcrumb crumbs={[{ name: 'Inicio', url: '/' }, { name: 'Mundial 2026', url: '/mundial-2026/' }, { name: teamName }]} />
+    <h1>{teamName} En Vivo — Mundial 2026</h1>
+    <p style="color:var(--muted);margin-bottom:20px">Ver todos los partidos de {teamName} en la Copa del Mundo 2026 en directo gratis. Múltiples canales disponibles.</p>
+    <MatchList matches={matches} emptyMessage={`No hay partidos de ${teamName} disponibles ahora mismo.`} />
+    <SeoText html={`<strong>${teamName}</strong> en vivo en el Mundial 2026 en Pirlo TV. Ver todos los partidos de ${teamName} en la Copa del Mundo 2026 en directo gratis. <strong>${teamName} pirlo tv · ${teamName} roja directa · ${teamName} en vivo mundial</strong>`} />
+  </div>
+</Base>

@@ -1,0 +1,42 @@
+name: Build and Deploy
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+
+      - name: Deploy to Cloudflare Pages
+        run: npx wrangler pages deploy dist/ --project-name=pirlotv-top
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+
+      - name: Ping search engines
+        run: bash scripts/ping-engines.sh
+
+      - name: Submit IndexNow
+        run: node scripts/indexnow-submit.js
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}

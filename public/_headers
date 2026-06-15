@@ -1,0 +1,23 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cache-Control: public, max-age=10800
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+/feed.xml
+  Cache-Control: public, max-age=3600
+
+/pirlo-tv/
+  Cache-Control: public, max-age=10800
+
+/tarjeta-roja/
+  Cache-Control: public, max-age=10800
+
+/mundial-2026/
+  Cache-Control: public, max-age=10800
+
+/copa-mundo-2026/
+  Cache-Control: public, max-age=10800

@@ -1,0 +1,56 @@
+---
+import type { Channel } from '../lib/types';
+
+interface Props {
+  channels: Channel[];
+  matchId: string;
+}
+const { channels, matchId } = Astro.props;
+
+const LANG_LABELS: Record<string, string> = {
+  en: 'Inglés', es: 'Español', pt: 'Portugués',
+  ar: 'Árabe', de: 'Alemán', fr: 'Francés',
+  it: 'Italiano', nl: 'Holandés', tr: 'Turco', tv: 'Sport TV',
+};
+
+const groups: Record<string, Channel[]> = {};
+for (const ch of channels) {
+  (groups[ch.langCode] ??= []).push(ch);
+}
+const firstAvailable = channels.find((c) => c.available) ?? channels[0];
+---
+<div class="ch-selector" id={`ch-sel-${matchId}`}>
+  {Object.entries(groups).map(([lang, chs]) => (
+    <div class="ch-group">
+      <div class="ch-group-label">{LANG_LABELS[lang] ?? lang}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        {chs.map((ch) => (
+          <button
+            class={`ch-btn${ch.embedUrl === firstAvailable?.embedUrl ? ' active' : ''}`}
+            data-embed={ch.embedUrl}
+            data-stable={ch.stableUrl}
+            data-match={matchId}
+            disabled={!ch.available}
+          >
+            {ch.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+document.querySelectorAll('.ch-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const matchId = (btn as HTMLElement).dataset.match;
+    const embedUrl = (btn as HTMLElement).dataset.embed;
+    const iframe = document.getElementById(`player-${matchId}`) as HTMLIFrameElement | null;
+    if (iframe && embedUrl) {
+      iframe.src = embedUrl;
+    }
+    document.querySelectorAll(`.ch-btn[data-match="${matchId}"]`).forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+</script>

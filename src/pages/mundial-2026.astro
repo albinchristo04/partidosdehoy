@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { mundialSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const wcMatches = (data.bySport['futbol'] ?? []).filter((m) => m.leagueSlug === 'copa-mundo-2026');
+const meta = mundialSeo(wcMatches.length);
+const faqs = hubFaq('futbol', wcMatches);
+const channelLangs = [...new Set(wcMatches.flatMap((m) => m.channels.map((c) => c.langCode)))];
+const langNames: Record<string, string> = { en: 'inglés', es: 'español', pt: 'portugués', de: 'alemán', fr: 'francés', ar: 'árabe', it: 'italiano' };
+const langList = channelLangs.map((l) => langNames[l] ?? l).join(', ');
+
+const schemas = [
+  breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'Mundial 2026', url: `${SITE_URL}/mundial-2026/` }]),
+  faqSchema(faqs),
+  itemListSchema('Partidos del Mundial 2026 en vivo — Pirlo TV', wcMatches.map((m) => `${SITE_URL}/partido/${m.slug}/`)),
+];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="wc-banner">🏆 FIFA World Cup 2026 — Copa del Mundo en Vivo</div>
+  <div class="hub-page">
+    <h1>Mundial 2026 En Vivo Gratis — Copa del Mundo</h1>
+    <p class="subtitle">
+      Ver la Copa del Mundo 2026 en directo gratis en Pirlo TV. {wcMatches.length} partido(s) disponible(s) hoy.
+      Canales en {langList || 'varios idiomas'}.
+    </p>
+    <MatchList matches={wcMatches} emptyMessage="No hay partidos del Mundial disponibles ahora mismo. Vuelve pronto." />
+    <FaqBlock items={faqs} />
+    <SeoText html={`Mundial 2026 en vivo hoy en Pirlo TV. Ver la Copa del Mundo 2026 en directo gratis con canales en español, inglés, portugués, alemán, francés e italiano. <strong>Pirlo TV Mundial 2026 · Roja Directa Mundial · Tarjeta Roja Mundial 2026</strong>. Actualizado cada 3 horas.`} />
+  </div>
+</Base>

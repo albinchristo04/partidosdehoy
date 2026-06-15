@@ -1,0 +1,23 @@
+---
+import type { NormalizedMatch } from '../lib/types';
+
+interface Props {
+  match: NormalizedMatch;
+  basePath?: string;
+}
+const { match: m, basePath = '/partido/' } = Astro.props;
+const href = `${basePath}${m.slug}/`;
+const availableChannels = m.channels.filter((c) => c.available).length || m.channels.length;
+---
+<div class="match-card">
+  <a href={href}>
+    <div class="match-title">
+      <span class="live-dot"></span>{m.team1} vs {m.team2}
+    </div>
+    <div class="match-meta">
+      <span class="match-time">{m.timeUtc} UTC</span>
+      <span class="match-ch-count">{availableChannels} canales</span>
+      <span class="match-league">{m.league}</span>
+    </div>
+  </a>
+</div>

@@ -1,0 +1,24 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getMatchData } from '../../lib/data';
+import { SITE_URL } from '../../lib/config';
+
+export async function getStaticPaths() {
+  const data = await getMatchData();
+  return data.matches.map((m) => ({ params: { slug: m.slug } }));
+}
+
+const { slug } = Astro.params;
+const canonical = `${SITE_URL}/partido/${slug}/`;
+---
+<Base
+  title={`Ver ${slug.replace(/-/g, ' ')} en vivo gratis | Pirlo TV`}
+  description={`Ver ${slug.replace(/-/g, ' ')} en vivo gratis en Pirlo TV.`}
+  canonical={canonical}
+  noindex={true}
+>
+  <meta http-equiv="refresh" content={`0;url=/partido/${slug}/`} />
+  <div class="container" style="padding:48px 16px;text-align:center">
+    <p>Redirigiendo... <a href={`/partido/${slug}/`}>Haz clic aquí si no te redirige</a></p>
+  </div>
+</Base>

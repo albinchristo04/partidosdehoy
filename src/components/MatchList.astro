@@ -1,0 +1,18 @@
+---
+import type { NormalizedMatch } from '../lib/types';
+import MatchCard from './MatchCard.astro';
+
+interface Props {
+  matches: NormalizedMatch[];
+  basePath?: string;
+  emptyMessage?: string;
+}
+const { matches, basePath = '/partido/', emptyMessage = 'No hay partidos disponibles ahora mismo.' } = Astro.props;
+---
+{matches.length === 0 ? (
+  <p class="no-matches" style="color:var(--muted);padding:32px 0">{emptyMessage}</p>
+) : (
+  <div class="match-grid">
+    {matches.map((m) => <MatchCard match={m} basePath={basePath} />)}
+  </div>
+)}

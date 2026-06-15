@@ -1,0 +1,121 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchCard from '../components/MatchCard.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { homeSeo, websiteSchema, organizationSchema } from '../lib/seo';
+
+const data = await getMatchData();
+const { matches, bySport } = data;
+const meta = homeSeo(matches.reduce((n, m) => n + m.channels.length, 0));
+
+const wcMatches = (bySport['futbol'] ?? []).filter((m) => m.leagueSlug === 'copa-mundo-2026');
+const futbolMatches = (bySport['futbol'] ?? []).filter((m) => m.leagueSlug !== 'copa-mundo-2026');
+const mlbMatches = bySport['mlb'] ?? [];
+const nhlMatches = bySport['nhl'] ?? [];
+const nbaMatches = bySport['nba'] ?? [];
+const ufcMatches = bySport['ufc'] ?? [];
+const otroMatches = bySport['otro'] ?? [];
+
+const hasWC = wcMatches.length > 0;
+const buildTime = new Date(data.generated).toLocaleString('es-ES', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'long', year: 'numeric' });
+
+const schemas = [websiteSchema(), organizationSchema()];
+
+const seoHtml = `Pirlo TV — Ver <strong>${matches.length} partidos en vivo hoy gratis</strong>. Roja Directa En Vivo y Tarjeta Roja TV en un solo lugar.
+Mundial 2026, Fútbol, MLB, NBA, NHL, UFC y más deportes en directo con múltiples canales
+en español, inglés, portugués, alemán, francés e italiano.
+<strong>pirlotv · roja dirécta · rojadirecta · tarjeta roja</strong>`;
+---
+<Base {...meta} schemas={schemas}>
+  {hasWC && (
+    <div class="wc-banner">
+      🏆 <a href="/mundial-2026/">MUNDIAL 2026 EN VIVO — {wcMatches.length} partidos disponibles ahora</a>
+    </div>
+  )}
+
+  <div class="hero">
+    <h1><span>Pirlo TV</span> — Ver Deportes en Vivo Gratis</h1>
+    <p>Roja Directa · Tarjeta Roja TV — Mundial 2026, Fútbol, MLB, NBA, NHL, UFC</p>
+    <p class="updated">Actualizado: {buildTime} UTC</p>
+  </div>
+
+  <div class="container">
+    {hasWC && (
+      <section class="section">
+        <h2 class="section-title">🏆 Mundial 2026 — Copa del Mundo</h2>
+        <div class="match-grid">
+          {wcMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/mundial-2026/">→ Ver todos los partidos del Mundial 2026</a></p>
+      </section>
+    )}
+
+    {futbolMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">⚽ Fútbol en Vivo</h2>
+        <div class="match-grid">
+          {futbolMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/futbol/">→ Ver todo el fútbol en vivo</a></p>
+      </section>
+    )}
+
+    {mlbMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">⚾ MLB Béisbol</h2>
+        <div class="match-grid">
+          {mlbMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/mlb/">→ Ver todos los partidos de MLB</a></p>
+      </section>
+    )}
+
+    {nhlMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">🏒 NHL Stanley Cup</h2>
+        <div class="match-grid">
+          {nhlMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/nhl/">→ Ver NHL en vivo</a></p>
+      </section>
+    )}
+
+    {nbaMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">🏀 NBA</h2>
+        <div class="match-grid">
+          {nbaMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/nba/">→ Ver NBA en vivo</a></p>
+      </section>
+    )}
+
+    {ufcMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">🥊 UFC en Vivo</h2>
+        <div class="match-grid">
+          {ufcMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+        <p style="margin-top:12px;font-size:0.85rem"><a href="/ufc/">→ Ver UFC en vivo</a></p>
+      </section>
+    )}
+
+    {otroMatches.length > 0 && (
+      <section class="section">
+        <h2 class="section-title">🎯 Otros Deportes</h2>
+        <div class="match-grid">
+          {otroMatches.map((m) => <MatchCard match={m} />)}
+        </div>
+      </section>
+    )}
+
+    {matches.length === 0 && (
+      <section class="section">
+        <p style="color:var(--muted);text-align:center;padding:60px 0;font-size:1.1rem">No hay partidos disponibles en este momento. Vuelve pronto.</p>
+      </section>
+    )}
+
+    <SeoText html={seoHtml} />
+  </div>
+</Base>

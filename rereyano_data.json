@@ -1,0 +1,78 @@
+{
+  "generated": "2026-06-15T06:16:49.639665+00:00",
+  "total": 3,
+  "matches": [
+    {
+      "day": "SUNDAY",
+      "index": 0,
+      "title": "Germany x Curaçao",
+      "time": "18:00",
+      "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/0",
+      "streams_available": 14,
+      "channels": [
+        {
+          "label": "EN·1",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/0?ch=0",
+          "stable_url": "https://wc.ppvtv.top/embed/hd1",
+          "available": true
+        },
+        {
+          "label": "ES",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/0?ch=1",
+          "stable_url": "https://wc.ppvtv.top/embed/hd2",
+          "available": true
+        },
+        {
+          "label": "DE",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/0?ch=2",
+          "stable_url": "https://wc.ppvtv.top/embed/hd3",
+          "available": true
+        }
+      ]
+    },
+    {
+      "day": "SUNDAY",
+      "index": 1,
+      "title": "NHL: Vegas Golden Knights @ Carolina Hurricanes",
+      "time": "01:00",
+      "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/1",
+      "streams_available": 8,
+      "channels": [
+        {
+          "label": "EN·1",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/1?ch=0",
+          "stable_url": "https://wc.ppvtv.top/embed/hd4",
+          "available": true
+        },
+        {
+          "label": "EN·2",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/1?ch=1",
+          "stable_url": "https://wc.ppvtv.top/embed/hd5",
+          "available": true
+        }
+      ]
+    },
+    {
+      "day": "SUNDAY",
+      "index": 2,
+      "title": "UFC Freedom 250: Ilia Topuria v Justin Gaethje",
+      "time": "22:00",
+      "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/2",
+      "streams_available": 6,
+      "channels": [
+        {
+          "label": "EN·1",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/2?ch=0",
+          "stable_url": "https://wc.ppvtv.top/embed/hd6",
+          "available": true
+        },
+        {
+          "label": "ES",
+          "embed_url": "https://wc.ppvtv.top/embed/SUNDAY/2?ch=1",
+          "stable_url": "https://wc.ppvtv.top/embed/hd7",
+          "available": false
+        }
+      ]
+    }
+  ]
+}

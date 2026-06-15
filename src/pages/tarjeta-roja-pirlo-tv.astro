@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { brandSeo } from '../lib/seo';
+
+const data = await getMatchData();
+const meta = brandSeo('tarjeta-roja-pirlo-tv', '/tarjeta-roja-pirlo-tv/');
+---
+<Base {...meta}>
+  <div class="hub-page">
+    <h1>Tarjeta Roja Pirlo TV En Vivo — Ver Deportes Gratis</h1>
+    <p class="subtitle">Tarjeta Roja Pirlo TV — Pirlo Tarjeta Roja. Ver todos los partidos de hoy en directo gratis.</p>
+    <MatchList matches={data.matches} />
+    <SeoText html={`<strong>Tarjeta Roja Pirlo TV</strong> — Tarjeta Roja Pirlo — Pirlo Tarjeta Roja. Ver deportes en vivo gratis. <strong>tarjeta roja pirlo · tarjeta roja pirlo tv en vivo</strong>`} />
+  </div>
+</Base>

@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['futbol'] ?? [];
+const meta = hubSeo('futbol', 'Fútbol', matches.length, '/futbol/');
+const faqs = hubFaq('fútbol', matches);
+const schemas = [
+  breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'Fútbol', url: `${SITE_URL}/futbol/` }]),
+  faqSchema(faqs),
+  itemListSchema('Partidos de Fútbol en vivo — Pirlo TV', matches.map((m) => `${SITE_URL}/partido/${m.slug}/`)),
+];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>Fútbol En Vivo Hoy — Ver Gratis</h1>
+    <p class="subtitle">Hoy hay {matches.length} partido(s) de fútbol en vivo en Pirlo TV. Pirlo TV Fútbol · Roja Directa Fútbol · Tarjeta Roja TV.</p>
+    <MatchList matches={matches} />
+    <FaqBlock items={faqs} />
+    <SeoText html={`Pirlo TV Fútbol en vivo — Champions League, Copa Libertadores, Liga MX, La Liga, Copa Argentina y más en directo gratis. Canales en español, inglés, francés e italiano. <strong>roja dirécta fútbol · tarjeta roja en vivo · pirlo tv futbol en vivo</strong>`} />
+  </div>
+</Base>

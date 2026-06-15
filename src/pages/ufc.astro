@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import SeoText from '../components/SeoText.astro';
+import { getMatchData } from '../lib/data';
+import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
+import { SITE_URL } from '../lib/config';
+
+const data = await getMatchData();
+const matches = data.bySport['ufc'] ?? [];
+const meta = hubSeo('ufc', 'UFC', matches.length, '/ufc/');
+meta.title = 'UFC En Vivo Hoy — Ver Peleas Gratis · Pirlo TV UFC | PirloTV';
+meta.description = `Ver UFC en vivo gratis en Pirlo TV. ${matches.length} peleas disponibles hoy. Canales en inglés y español. Sin registro.`;
+const faqs = hubFaq('UFC', matches);
+const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'UFC', url: `${SITE_URL}/ufc/` }]), faqSchema(faqs)];
+---
+<Base {...meta} schemas={schemas}>
+  <div class="hub-page">
+    <h1>UFC En Vivo Hoy — Ver Peleas Gratis</h1>
+    <p class="subtitle">Ver UFC en vivo gratis en Pirlo TV. {matches.length} pelea(s) disponible(s) hoy. Sin registro. Pirlo TV UFC · Roja Directa UFC.</p>
+    <MatchList matches={matches} emptyMessage="No hay peleas de UFC disponibles ahora mismo." />
+    <FaqBlock items={faqs} />
+    <SeoText html={`UFC en vivo hoy en Pirlo TV. Ver la UFC en directo gratis con canales en inglés y español. Sin registro. <strong>pirlo tv ufc · ufc en vivo hoy · roja directa ufc · ver ufc gratis</strong>`} />
+  </div>
+</Base>
