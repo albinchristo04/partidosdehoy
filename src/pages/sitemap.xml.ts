@@ -53,7 +53,10 @@ export const GET: APIRoute = async () => {
   ]);
 
   const allEntries = [...staticPages, ...matchEntries];
-  const now = new Date().toISOString().split('T')[0];
+  // Full ISO 8601 timestamp (not just the date). Bing uses <lastmod> as a
+  // freshness signal, and a moving timestamp on each 3-hourly rebuild tells it
+  // the high-priority pages keep changing and are worth recrawling often.
+  const now = new Date().toISOString();
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

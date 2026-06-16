@@ -23,12 +23,32 @@ const { title, description, canonical, ogTitle, ogDescription, schemas = [], noi
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
-  {noindex && <meta name="robots" content="noindex" />}
+  {noindex
+    ? <meta name="robots" content="noindex, nofollow" />
+    : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
+  {/* Bing-specific bot directive; Bing also reads the generic robots meta above. */}
+  {!noindex && <meta name="bingbot" content="index, follow" />}
   <link rel="canonical" href={canonical} />
+
+  {/* Bing Webmaster meta verification — same code as BingSiteAuth.xml, kept as a
+     fallback so verification survives even if the XML file is ever missed. */}
+  <meta name="msvalidate.01" content="F01125A32DD0550253E1CD24EAA0B21D" />
+
+  {/* hreflang — the audience spans Spain, Mexico and wider LatAm Spanish. Bing
+     weights language/region signals heavily, so we declare es plus the main
+     regional variants pointing at the same canonical, with x-default. */}
+  <link rel="alternate" hreflang="es" href={canonical} />
+  <link rel="alternate" hreflang="es-ES" href={canonical} />
+  <link rel="alternate" hreflang="es-MX" href={canonical} />
+  <link rel="alternate" hreflang="es-AR" href={canonical} />
+  <link rel="alternate" hreflang="es-CO" href={canonical} />
+  <link rel="alternate" hreflang="x-default" href={canonical} />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content={SITE_NAME} />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:locale:alternate" content="es_MX" />
   <meta property="og:title" content={ogTitle ?? title} />
   <meta property="og:description" content={ogDescription ?? description} />
   <meta property="og:url" content={canonical} />

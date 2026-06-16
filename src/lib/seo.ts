@@ -109,9 +109,12 @@ export function websiteSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
     name: SITE_NAME,
     url: SITE_URL,
+    inLanguage: 'es',
     alternateName: ['PirloTV', 'Pirlo TV En Vivo', 'Roja Directa', 'Tarjeta Roja TV', 'RojaDirecta', 'Roja Dirécta', 'Pirlo TV Mundial 2026'],
+    publisher: { '@id': `${SITE_URL}/#organization` },
     potentialAction: {
       '@type': 'SearchAction',
       target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/?q={search_term_string}` },
@@ -121,12 +124,20 @@ export function websiteSchema() {
 }
 
 export function organizationSchema() {
+  // Richer entity description strengthens the E-E-A-T / knowledge-entity signals
+  // Bing leans on for ranking. @id ties it to the WebSite node above.
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
     url: SITE_URL,
-    alternateName: ['PirloTV', 'Roja Directa', 'Tarjeta Roja TV'],
+    logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon.svg` },
+    image: `${SITE_URL}/favicon.svg`,
+    description: 'Pirlo TV — ver deportes en vivo gratis: Mundial 2026, fútbol, MLB, NBA, NHL y UFC en directo. Roja Directa y Tarjeta Roja TV.',
+    alternateName: ['PirloTV', 'Roja Directa', 'Tarjeta Roja TV', 'RojaDirecta'],
+    knowsLanguage: ['es', 'en', 'pt'],
+    areaServed: ['ES', 'MX', 'AR', 'CO', 'CL', 'PE', 'US'],
   };
 }
 
