@@ -1,0 +1,105 @@
+---
+// Substantive, human-readable body content for sport/hub pages.
+// Gives search engines (Bing especially) real on-page text and a relevant
+// internal-link graph instead of a single thin subtitle. Content is genuinely
+// useful to a visitor: what's on, how to watch, what devices/languages work,
+// and where to go next.
+interface RelatedLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  /** Plain-language name of the sport/competition, e.g. "la NBA", "MotoGP". */
+  subject: string;
+  /** Short intro paragraph (1-2 sentences) describing what this page covers. */
+  intro: string;
+  /** Bullet-style highlights of what a visitor will find here. */
+  highlights: string[];
+  /** Optional extra context paragraph (schedule, season, teams, etc.). */
+  context?: string;
+  /** Related hub pages to link to internally. */
+  related?: RelatedLink[];
+}
+
+const { subject, intro, highlights, context, related = [] } = Astro.props;
+---
+<section class="hub-content">
+  <h2>Ver {subject} en vivo gratis</h2>
+  <p>{intro}</p>
+
+  {highlights.length > 0 && (
+    <ul class="hub-highlights">
+      {highlights.map((h) => <li>{h}</li>)}
+    </ul>
+  )}
+
+  {context && <p>{context}</p>}
+
+  <h3>¿Cómo ver {subject} en directo?</h3>
+  <p>
+    Abre el partido que quieras seguir, elige uno de los canales disponibles y el
+    reproductor cargará la transmisión al instante. Si un canal va lento o no abre,
+    selecciona otro: cada evento ofrece varias opciones en español, inglés y
+    portugués. No necesitas registro ni instalar ninguna aplicación, y funciona
+    desde el móvil, la tablet, el ordenador o la Smart TV.
+  </p>
+
+  {related.length > 0 && (
+    <>
+      <h3>Más deportes en vivo</h3>
+      <p class="hub-related">
+        {related.map((r, i) => (
+          <>
+            <a href={r.href}>{r.label}</a>{i < related.length - 1 ? ' · ' : ''}
+          </>
+        ))}
+      </p>
+    </>
+  )}
+</section>
+
+<style>
+  .hub-content {
+    max-width: 760px;
+    margin: 32px 0;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .hub-content h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .hub-content h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 24px 0 10px;
+  }
+  .hub-content p {
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .hub-highlights {
+    list-style: none;
+    margin: 4px 0 16px;
+    padding: 0;
+  }
+  .hub-highlights li {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 4px 0 4px 22px;
+    position: relative;
+  }
+  .hub-highlights li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+  }
+  .hub-related a {
+    color: var(--red) !important;
+    font-weight: 600;
+  }
+</style>

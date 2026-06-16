@@ -1,19 +1,48 @@
 ---
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
+import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
-import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { hubSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
 import { SITE_URL } from '../lib/config';
 
 const data = await getMatchData();
 const matches = data.bySport['nba'] ?? [];
 const meta = hubSeo('nba', 'NBA', matches.length, '/nba/');
-const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'NBA', url: `${SITE_URL}/nba/` }])];
+meta.title = 'NBA En Vivo Hoy — Ver Baloncesto Gratis · Pirlo TV NBA | PirloTV';
+const faqs = hubFaq('NBA baloncesto', matches);
+const schemas = [
+  breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'NBA', url: `${SITE_URL}/nba/` }]),
+  faqSchema(faqs),
+  itemListSchema('Partidos de NBA en vivo — Pirlo TV', matches.map((m) => `${SITE_URL}/partido/${m.slug}/`)),
+];
 ---
 <Base {...meta} schemas={schemas}>
   <div class="hub-page">
     <h1>NBA En Vivo Hoy — Baloncesto Gratis</h1>
-    <p class="subtitle">Ver NBA en vivo gratis en Pirlo TV. Pirlo TV NBA · Roja Directa NBA.</p>
+    <p class="subtitle">Hoy hay {matches.length} partido(s) de NBA en vivo en Pirlo TV. Pirlo TV NBA · Roja Directa NBA · Tarjeta Roja Baloncesto.</p>
     <MatchList matches={matches} emptyMessage="No hay partidos de NBA disponibles ahora mismo." />
+    <HubContent
+      subject="la NBA"
+      intro="Sigue la NBA en directo desde Pirlo TV: temporada regular, All-Star, Playoffs y las Finales de la NBA con transmisiones gratuitas y varios canales por partido."
+      highlights={[
+        'Lakers, Celtics, Warriors, Bucks, Nuggets y los 30 equipos de la liga',
+        'Canales en español e inglés para cada encuentro',
+        'Horarios convertidos a España, México, Argentina y Colombia',
+        'Sin registro y compatible con móvil, tablet, PC y Smart TV',
+      ]}
+      context="El baloncesto de la NBA se juega en horario nocturno de Estados Unidos, que en España suele caer de madrugada y en México y Latinoamérica a última hora de la noche. En cada ficha de partido encontrarás la hora exacta en tu país junto a los canales disponibles."
+      related={[
+        { href: '/nhl/', label: 'NHL en vivo' },
+        { href: '/mlb/', label: 'MLB béisbol' },
+        { href: '/ufc/', label: 'UFC en directo' },
+        { href: '/futbol/', label: 'Fútbol en vivo' },
+      ]}
+    />
+    <FaqBlock items={faqs} />
+    <SeoText html={`NBA en vivo hoy en Pirlo TV. Ver baloncesto de la NBA en directo gratis sin registro, con canales en español e inglés. <strong>pirlo tv nba · nba en vivo gratis · roja directa nba · ver baloncesto en vivo</strong>`} />
   </div>
 </Base>

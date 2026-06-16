@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
 import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
 import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
 import { hubSeo, breadcrumbSchema } from '../lib/seo';
@@ -21,6 +22,23 @@ const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { na
     <h1>UFC En Vivo Hoy — Ver Peleas Gratis</h1>
     <p class="subtitle">Ver UFC en vivo gratis en Pirlo TV. {matches.length} pelea(s) disponible(s) hoy. Sin registro. Pirlo TV UFC · Roja Directa UFC.</p>
     <MatchList matches={matches} emptyMessage="No hay peleas de UFC disponibles ahora mismo." />
+    <HubContent
+      subject="la UFC"
+      intro="Sigue las peleas de la UFC en directo desde Pirlo TV: cartelera estelar, preliminares y los eventos numerados con transmisiones gratuitas y varios canales por velada."
+      highlights={[
+        'Eventos UFC numerados y Fight Nights de cada fin de semana',
+        'Cartelera estelar y peleas preliminares',
+        'Canales en español e inglés para cada combate',
+        'Horarios adaptados a España, México y Latinoamérica',
+      ]}
+      context="Las veladas de la UFC suelen empezar de madrugada en horario de España, ya que la cartelera estelar arranca tras las preliminares. En la ficha de cada evento verás la hora de inicio convertida a tu país y los canales disponibles."
+      related={[
+        { href: '/motogp/', label: 'MotoGP en vivo' },
+        { href: '/nba/', label: 'NBA en vivo' },
+        { href: '/nhl/', label: 'NHL en vivo' },
+        { href: '/futbol/', label: 'Fútbol en vivo' },
+      ]}
+    />
     <FaqBlock items={faqs} />
     <SeoText html={`UFC en vivo hoy en Pirlo TV. Ver la UFC en directo gratis con canales en inglés y español. Sin registro. <strong>pirlo tv ufc · ufc en vivo hoy · roja directa ufc · ver ufc gratis</strong>`} />
   </div>

@@ -1,19 +1,48 @@
 ---
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
+import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
+import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
-import { hubSeo, breadcrumbSchema } from '../lib/seo';
+import { hubSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
+import { hubFaq, faqSchema } from '../lib/faq';
 import { SITE_URL } from '../lib/config';
 
 const data = await getMatchData();
 const matches = data.bySport['motogp'] ?? [];
 const meta = hubSeo('motogp', 'MotoGP', matches.length, '/motogp/');
-const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'MotoGP', url: `${SITE_URL}/motogp/` }])];
+meta.title = 'MotoGP En Vivo Hoy — Ver Carreras Gratis · Pirlo TV MotoGP | PirloTV';
+const faqs = hubFaq('MotoGP', matches);
+const schemas = [
+  breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { name: 'MotoGP', url: `${SITE_URL}/motogp/` }]),
+  faqSchema(faqs),
+  itemListSchema('Carreras de MotoGP en vivo — Pirlo TV', matches.map((m) => `${SITE_URL}/partido/${m.slug}/`)),
+];
 ---
 <Base {...meta} schemas={schemas}>
   <div class="hub-page">
     <h1>MotoGP En Vivo Hoy — Ver Gratis</h1>
-    <p class="subtitle">Ver MotoGP en vivo gratis en Pirlo TV. Pirlo TV MotoGP · Roja Directa MotoGP.</p>
+    <p class="subtitle">Hoy hay {matches.length} carrera(s) de MotoGP en vivo en Pirlo TV. Pirlo TV MotoGP · Roja Directa MotoGP.</p>
     <MatchList matches={matches} emptyMessage="No hay carreras de MotoGP disponibles ahora mismo." />
+    <HubContent
+      subject="MotoGP"
+      intro="Vive cada Gran Premio de MotoGP en directo desde Pirlo TV: entrenamientos, clasificación, Sprint y la carrera del domingo con transmisiones gratuitas y varios canales."
+      highlights={[
+        'Todos los Grandes Premios del Mundial de MotoGP',
+        'Práctica libre, clasificación, carrera al Sprint y carrera principal',
+        'Canales en español e inglés para cada sesión',
+        'Horarios adaptados a España, México y Latinoamérica',
+      ]}
+      context="El calendario de MotoGP recorre circuitos de Europa, América y Asia, por lo que los horarios de cada carrera cambian mucho según la sede. En la ficha de cada Gran Premio verás la hora de salida convertida a tu zona horaria junto a los canales disponibles."
+      related={[
+        { href: '/ufc/', label: 'UFC en directo' },
+        { href: '/futbol/', label: 'Fútbol en vivo' },
+        { href: '/nba/', label: 'NBA en vivo' },
+        { href: '/nhl/', label: 'NHL en vivo' },
+      ]}
+    />
+    <FaqBlock items={faqs} />
+    <SeoText html={`MotoGP en vivo hoy en Pirlo TV. Ver las carreras del Mundial de MotoGP en directo gratis, con canales en español e inglés. <strong>pirlo tv motogp · motogp en vivo gratis · roja directa motogp · ver motogp online</strong>`} />
   </div>
 </Base>

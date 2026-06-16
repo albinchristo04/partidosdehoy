@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
 import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
 import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
 import { hubSeo, breadcrumbSchema } from '../lib/seo';
@@ -20,6 +21,23 @@ const schemas = [breadcrumbSchema([{ name: 'Inicio', url: `${SITE_URL}/` }, { na
     <h1>NHL En Vivo — Stanley Cup 2026 en Directo</h1>
     <p class="subtitle">Ver NHL en vivo gratis en Pirlo TV. Stanley Cup 2026 en directo. Pirlo TV NHL · Roja Directa Hockey.</p>
     <MatchList matches={matches} emptyMessage="No hay partidos de NHL disponibles ahora mismo." />
+    <HubContent
+      subject="la NHL"
+      intro="Sigue el hockey sobre hielo de la NHL en directo desde Pirlo TV: temporada regular, Playoffs y la final de la Stanley Cup 2026 con transmisiones gratuitas y varios canales por partido."
+      highlights={[
+        'Todos los equipos de la liga, de los Rangers a los Golden Knights',
+        'Playoffs y final de la Stanley Cup 2026 en directo',
+        'Canales en español e inglés para cada partido',
+        'Horarios adaptados a España, México y Latinoamérica',
+      ]}
+      context="Los Playoffs de la NHL se juegan en primavera y culminan con la Stanley Cup. Los partidos arrancan en horario de tarde-noche de Norteamérica, así que en España suelen ser de madrugada; consulta la hora exacta de cada encuentro en su ficha."
+      related={[
+        { href: '/nba/', label: 'NBA en vivo' },
+        { href: '/mlb/', label: 'MLB béisbol' },
+        { href: '/ufc/', label: 'UFC en directo' },
+        { href: '/futbol/', label: 'Fútbol en vivo' },
+      ]}
+    />
     <FaqBlock items={faqs} />
     <SeoText html={`NHL Stanley Cup 2026 en vivo hoy en Pirlo TV. Ver hockey en directo gratis sin registro. <strong>pirlo tv nhl · roja directa nhl · stanley cup en vivo · ver hockey en vivo gratis</strong>`} />
   </div>

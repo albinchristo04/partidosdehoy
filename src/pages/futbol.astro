@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
 import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
 import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
 import { hubSeo, breadcrumbSchema, itemListSchema } from '../lib/seo';
@@ -23,6 +24,23 @@ const schemas = [
     <h1>Fútbol En Vivo Hoy — Ver Gratis</h1>
     <p class="subtitle">Hoy hay {matches.length} partido(s) de fútbol en vivo en Pirlo TV. Pirlo TV Fútbol · Roja Directa Fútbol · Tarjeta Roja TV.</p>
     <MatchList matches={matches} />
+    <HubContent
+      subject="el fútbol"
+      intro="Pirlo TV reúne el fútbol en vivo de las grandes competiciones en un solo lugar: Champions League, Copa Libertadores, La Liga, Liga MX, Premier League, Serie A y muchas más, con transmisiones gratuitas y varios canales por partido."
+      highlights={[
+        'Ligas de Europa y América, copas nacionales e internacionales',
+        'Canales en español, inglés, portugués, francés e italiano',
+        'Horarios convertidos a España, México, Argentina y Colombia',
+        'Sin registro y compatible con móvil, tablet, PC y Smart TV',
+      ]}
+      context="Durante el Mundial 2026, el fútbol de selecciones tiene su propia sección dedicada con todos los partidos de la Copa del Mundo. El resto de partidos de clubes y ligas los encuentras aquí, ordenados por hora de inicio."
+      related={[
+        { href: '/mundial-2026/', label: 'Mundial 2026' },
+        { href: '/mlb/', label: 'MLB béisbol' },
+        { href: '/nba/', label: 'NBA en vivo' },
+        { href: '/ufc/', label: 'UFC en directo' },
+      ]}
+    />
     <FaqBlock items={faqs} />
     <SeoText html={`Pirlo TV Fútbol en vivo — Champions League, Copa Libertadores, Liga MX, La Liga, Copa Argentina y más en directo gratis. Canales en español, inglés, francés e italiano. <strong>roja dirécta fútbol · tarjeta roja en vivo · pirlo tv futbol en vivo</strong>`} />
   </div>

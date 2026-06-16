@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import MatchList from '../components/MatchList.astro';
 import FaqBlock from '../components/FaqBlock.astro';
+import HubContent from '../components/HubContent.astro';
 import SeoText from '../components/SeoText.astro';
 import { getMatchData } from '../lib/data';
 import { hubSeo, breadcrumbSchema } from '../lib/seo';
@@ -23,6 +24,23 @@ const schemas = [
     <h1>MLB En Vivo — Béisbol en Directo Gratis</h1>
     <p class="subtitle">Hoy hay {matches.length} partido(s) de MLB en vivo. Pirlo TV MLB · Roja Directa MLB · Tarjeta Roja MLB.</p>
     <MatchList matches={matches} emptyMessage="No hay partidos de MLB disponibles ahora mismo." />
+    <HubContent
+      subject="la MLB"
+      intro="Sigue el béisbol de las Grandes Ligas en directo desde Pirlo TV: temporada regular, Playoffs y la Serie Mundial con transmisiones gratuitas y varios canales por partido."
+      highlights={[
+        'Yankees, Dodgers, Padres, Red Sox, Astros y los 30 equipos',
+        'Canales en español e inglés para cada encuentro',
+        'Horarios convertidos a España, México y Latinoamérica',
+        'Sin registro y compatible con cualquier dispositivo',
+      ]}
+      context="La MLB juega prácticamente a diario durante la temporada, con varios partidos al mismo tiempo. Aquí los verás ordenados por hora de inicio, cada uno con su hora local y sus canales disponibles."
+      related={[
+        { href: '/beisbol/', label: 'Béisbol en vivo' },
+        { href: '/nba/', label: 'NBA en vivo' },
+        { href: '/nhl/', label: 'NHL en vivo' },
+        { href: '/futbol/', label: 'Fútbol en vivo' },
+      ]}
+    />
     <FaqBlock items={faqs} />
     <SeoText html={`Ver MLB en vivo gratis en Pirlo TV. Todos los partidos de la Major League Baseball en directo. Yankees, Dodgers, Padres, Red Sox, Astros y los 30 equipos. <strong>pirlo tv mlb · roja directa mlb · roja dirécta mlb · tarjeta roja mlb</strong>`} />
   </div>
