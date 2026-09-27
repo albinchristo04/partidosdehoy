@@ -1,9 +1,10 @@
-import type { RawApiResponse, RawMatch, RawChannel, NormalizedMatch, MatchData, Channel, Sport } from './types';
+import type { RawApiResponse, RawMatch, RawServer, NormalizedMatch, MatchData, Channel, Sport } from './types';
 import { generateSlug, matchSlug } from './slugs';
 import { DATA_URL } from './config';
 
-// Fix mojibake encoding from API
+// Fix mojibake encoding from API (no-op when the string is already valid UTF-8)
 function fixEncoding(str: string): string {
+  if (!str) return str;
   try {
     return decodeURIComponent(escape(str));
   } catch {
@@ -31,7 +32,7 @@ function isNationalTeam(name: string): boolean {
   return WC_TEAMS.has(name);
 }
 
-// League slug map
+// League slug map (kept for football + legacy league naming)
 const LEAGUE_SLUG_MAP: Record<string, string> = {
   'FIFA World Cup 2026': 'copa-mundo-2026',
   'World Cup': 'copa-mundo-2026',
@@ -51,61 +52,47 @@ const LEAGUE_SLUG_MAP: Record<string, string> = {
   'MotoGP': 'motogp',
 };
 
-function inferSportAndLeague(prefix: string, team1: string, team2: string): { sport: Sport; league: string; leagueSlug: string; sportSlug: string } {
-  const p = prefix.trim();
+// Map the new source's `category` + `league` fields onto the site's sport model.
+function inferSport(
+  category: string,
+  league: string,
+  team1: string,
+  team2: string,
+): { sport: Sport; sportSlug: string; leagueSlug: string } {
+  const cat = category.trim();
+  const lg = league.trim();
 
-  if (p.startsWith('NHL') || p === 'NHL') return { sport: 'nhl', league: 'NHL', leagueSlug: 'nhl', sportSlug: 'nhl' };
-  if (p.startsWith('NBA')) return { sport: 'nba', league: 'NBA', leagueSlug: 'nba', sportSlug: 'nba' };
-  if (p.startsWith('MLB')) return { sport: 'mlb', league: 'MLB', leagueSlug: 'mlb', sportSlug: 'mlb' };
-  if (p.toUpperCase().startsWith('UFC')) return { sport: 'ufc', league: 'UFC', leagueSlug: 'ufc', sportSlug: 'ufc' };
-  if (p.startsWith('MotoGP')) return { sport: 'motogp', league: 'MotoGP', leagueSlug: 'motogp', sportSlug: 'motogp' };
-  if (p.startsWith('Ligue Des Champions') || p.startsWith('Champions League')) return { sport: 'futbol', league: 'Champions League', leagueSlug: 'champions-league', sportSlug: 'futbol' };
-  if (p.startsWith('Copa Libertadores')) return { sport: 'futbol', league: 'Copa Libertadores', leagueSlug: 'copa-libertadores', sportSlug: 'futbol' };
-  if (p.startsWith('Copa Sudamericana')) return { sport: 'futbol', league: 'Copa Sudamericana', leagueSlug: 'copa-sudamericana', sportSlug: 'futbol' };
-  if (p.startsWith('Liga MX')) return { sport: 'futbol', league: 'Liga MX', leagueSlug: 'liga-mx', sportSlug: 'futbol' };
-  if (p.startsWith('La Liga')) return { sport: 'futbol', league: 'La Liga', leagueSlug: 'laliga', sportSlug: 'futbol' };
-  if (p.startsWith('Copa Argentina')) return { sport: 'futbol', league: 'Copa Argentina', leagueSlug: 'copa-argentina', sportSlug: 'futbol' };
-  if (p.startsWith('Ecuador Ligapro')) return { sport: 'futbol', league: 'Ecuador Ligapro', leagueSlug: 'liga-ecuador', sportSlug: 'futbol' };
-  if (p.startsWith('Concacaf')) return { sport: 'futbol', league: 'Concacaf Champions Cup', leagueSlug: 'concacaf', sportSlug: 'futbol' };
-
-  // National teams → World Cup
-  if (isNationalTeam(team1) || isNationalTeam(team2)) {
-    return { sport: 'futbol', league: 'FIFA World Cup 2026', leagueSlug: 'copa-mundo-2026', sportSlug: 'futbol' };
+  // Football (soccer) — includes the World Cup special case
+  if (cat === 'Football') {
+    if (isNationalTeam(team1) || isNationalTeam(team2)) {
+      return { sport: 'futbol', sportSlug: 'futbol', leagueSlug: 'copa-mundo-2026' };
+    }
+    return { sport: 'futbol', sportSlug: 'futbol', leagueSlug: LEAGUE_SLUG_MAP[lg] ?? generateSlug(lg || 'futbol') };
   }
 
-  // Fallback: generic football
-  if (p.length > 0) {
-    const slug = generateSlug(p);
-    return { sport: 'futbol', league: p, leagueSlug: slug, sportSlug: 'futbol' };
-  }
+  if (cat === 'Basketball' && /\bNBA\b/i.test(lg)) return { sport: 'nba', sportSlug: 'nba', leagueSlug: 'nba' };
+  if (cat === 'Ice Hockey' || /\bNHL\b/i.test(lg)) return { sport: 'nhl', sportSlug: 'nhl', leagueSlug: 'nhl' };
+  if (cat === 'Baseball' || /\bMLB\b/i.test(lg)) return { sport: 'mlb', sportSlug: 'mlb', leagueSlug: 'mlb' };
+  if ((cat === 'Combat Sports' || cat === 'MMA') && /\bUFC\b/i.test(lg)) return { sport: 'ufc', sportSlug: 'ufc', leagueSlug: 'ufc' };
+  if (cat === 'Motorsport' || /\bMotoGP\b/i.test(lg)) return { sport: 'motogp', sportSlug: 'motogp', leagueSlug: 'motogp' };
 
-  return { sport: 'otro', league: 'Otros', leagueSlug: 'otros', sportSlug: 'otros' };
+  // Everything else (NFL, NBL, Boxing, MLS, Cricket, Rugby, Golf, …) → generic bucket,
+  // but still get a dedicated league page generated from the real `league` name.
+  return { sport: 'otro', sportSlug: 'otro', leagueSlug: LEAGUE_SLUG_MAP[lg] ?? generateSlug(lg || 'otros') };
 }
 
-function parseSeparator(title: string): { team1: string; team2: string; leaguePrefix: string } {
-  // Extract prefix before ':'
-  let leaguePrefix = '';
-  let body = title;
-  const colonIdx = title.indexOf(':');
-  if (colonIdx !== -1) {
-    leaguePrefix = title.slice(0, colonIdx).trim();
-    body = title.slice(colonIdx + 1).trim();
-  }
-
-  // Try separators in order: ' x ', ' @ ', ' v ', ' vs '
-  for (const sep of [' x ', ' @ ', ' v ', ' vs ']) {
-    const idx = body.indexOf(sep);
+// Split a headline into two competitors. New source uses " at " (US sports) and " vs. ".
+function parseTitle(title: string): { team1: string; team2: string } {
+  for (const sep of [' x ', ' @ ', ' at ', ' vs. ', ' vs ', ' v ']) {
+    const idx = title.indexOf(sep);
     if (idx !== -1) {
       return {
-        team1: body.slice(0, idx).trim(),
-        team2: body.slice(idx + sep.length).trim(),
-        leaguePrefix,
+        team1: title.slice(0, idx).trim(),
+        team2: title.slice(idx + sep.length).trim(),
       };
     }
   }
-
-  // Fallback — no separator found
-  return { team1: body, team2: '', leaguePrefix };
+  return { team1: title.trim(), team2: '' };
 }
 
 function parseLangCode(label: string): string {
@@ -122,60 +109,73 @@ function parseLangCode(label: string): string {
   return 'en';
 }
 
-// Day names → JS day index (0=Sunday)
-const DAY_MAP: Record<string, number> = {
-  SUNDAY: 0, MONDAY: 1, TUESDAY: 2, WEDNESDAY: 3,
-  THURSDAY: 4, FRIDAY: 5, SATURDAY: 6,
-};
-
-export function resolveIsoDate(generated: string, day: string, time: string): string {
-  const base = new Date(generated);
-  const baseDay = base.getUTCDay();
-  const targetDay = DAY_MAP[day.toUpperCase()] ?? baseDay;
-  let delta = targetDay - baseDay;
-  // Future weekdays relative to generated → assume previous week
-  if (delta > 0) delta -= 7;
-  const matchDate = new Date(base);
-  matchDate.setUTCDate(base.getUTCDate() + delta);
-  const [h, m] = time.split(':');
-  matchDate.setUTCHours(Number(h), Number(m), 0, 0);
-  return matchDate.toISOString();
+// The new source ships a full ISO `start_time`; derive the "HH:MM" UTC string
+// the components/timezone helpers expect. Falls back to the feed timestamp.
+function timeFromIso(startIso: string, fallbackIso: string): { timeUtc: string; isoDateUtc: string } {
+  const d = startIso ? new Date(startIso) : null;
+  if (d && !isNaN(d.getTime())) {
+    const hh = String(d.getUTCHours()).padStart(2, '0');
+    const mm = String(d.getUTCMinutes()).padStart(2, '0');
+    return { timeUtc: `${hh}:${mm}`, isoDateUtc: d.toISOString() };
+  }
+  const fb = new Date(fallbackIso);
+  const base = isNaN(fb.getTime()) ? new Date() : fb;
+  const hh = String(base.getUTCHours()).padStart(2, '0');
+  const mm = String(base.getUTCMinutes()).padStart(2, '0');
+  return { timeUtc: `${hh}:${mm}`, isoDateUtc: base.toISOString() };
 }
 
-function normalizeChannel(raw: RawChannel): Channel {
+function normalizeServer(raw: RawServer): Channel {
   return {
-    label: raw.label,
-    langCode: parseLangCode(raw.label),
+    label: raw.name,
+    langCode: parseLangCode(raw.name),
     embedUrl: raw.embed_url,
-    stableUrl: raw.stable_url,
-    available: raw.available,
+    stableUrl: raw.embed_url,
+    available: true,
   };
 }
 
 function normalizeMatch(raw: RawMatch, generated: string): NormalizedMatch {
   const title = fixEncoding(raw.title);
-  const { team1, team2, leaguePrefix } = parseSeparator(title);
-  const fixedTeam1 = fixEncoding(team1);
-  const fixedTeam2 = fixEncoding(team2);
-  const fixedPrefix = fixEncoding(leaguePrefix);
-  const { sport, league, leagueSlug, sportSlug } = inferSportAndLeague(fixedPrefix || fixedTeam1, fixedTeam1, fixedTeam2);
-  const isoDateUtc = resolveIsoDate(generated, raw.day, raw.time);
-  const slug = matchSlug(fixedTeam1 || title, fixedTeam2 || 'partido');
+  const home = (raw.teams?.home?.name ?? '').trim();
+  const away = (raw.teams?.away?.name ?? '').trim();
+
+  let team1: string;
+  let team2: string;
+  if (home || away) {
+    team1 = home;
+    team2 = away;
+  } else {
+    const parsed = parseTitle(title);
+    team1 = parsed.team1;
+    team2 = parsed.team2;
+  }
+  team1 = fixEncoding(team1);
+  team2 = fixEncoding(team2);
+
+  const league = fixEncoding(raw.league) || 'Otros';
+  const category = fixEncoding(raw.category);
+  const { sport, sportSlug, leagueSlug } = inferSport(category, league, team1, team2);
+  const { timeUtc, isoDateUtc } = timeFromIso(raw.start_time, generated);
+  const slug = team2 ? matchSlug(team1, team2) : generateSlug(team1 || title);
+  const channels = (raw.servers ?? []).map(normalizeServer);
 
   return {
-    id: `${raw.day}-${raw.index}`,
-    day: raw.day,
-    index: raw.index,
+    id: raw.id,
     rawTitle: title,
-    team1: fixedTeam1,
-    team2: fixedTeam2,
+    team1,
+    team2,
     league,
+    category,
     sport,
-    timeUtc: raw.time,
+    status: fixEncoding(raw.status),
+    poster: raw.poster ?? '',
+    timeUtc,
     isoDateUtc,
     embedUrl: raw.embed_url,
-    channels: raw.channels.map(normalizeChannel),
-    streamsAvailable: raw.streams_available,
+    pageUrl: raw.page_url ?? '',
+    channels,
+    streamsAvailable: channels.length,
     slug,
     leagueSlug,
     sportSlug,
@@ -199,11 +199,15 @@ export async function getMatchData(): Promise<MatchData> {
       const { default: fallback } = await import('../../rereyano_data.json');
       raw = fallback as RawApiResponse;
     } catch {
-      raw = { generated: new Date().toISOString(), total: 0, matches: [] };
+      raw = { source: '', updated: new Date().toISOString(), count: 0, live: 0, upcoming: 0, matches: [] };
     }
   }
 
-  const matches = raw.matches.map((m) => normalizeMatch(m, raw.generated));
+  const generated = raw.updated || new Date().toISOString();
+  // "24/7 channel" entries are always-on TV streams, not head-to-head matches.
+  const matches = (raw.matches ?? [])
+    .filter((m) => m.league !== '24/7 channel')
+    .map((m) => normalizeMatch(m, generated));
 
   const bySport: Record<string, NormalizedMatch[]> = {};
   const byLeague: Record<string, NormalizedMatch[]> = {};
@@ -216,7 +220,7 @@ export async function getMatchData(): Promise<MatchData> {
     if (m.team2) (byTeam[generateSlug(m.team2)] ??= []).push(m);
   }
 
-  _cache = { generated: raw.generated, matches, bySport, byLeague, byTeam };
+  _cache = { generated, matches, bySport, byLeague, byTeam };
   return _cache;
 }
 

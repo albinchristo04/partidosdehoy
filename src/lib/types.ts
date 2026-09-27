@@ -1,23 +1,34 @@
-export interface RawChannel {
-  label: string;
+export interface RawServer {
+  name: string;
   embed_url: string;
-  stable_url: string;
-  available: boolean;
+}
+
+export interface RawTeam {
+  name: string;
+  logo: string;
 }
 
 export interface RawMatch {
-  day: string;
-  index: number;
+  id: string;
   title: string;
-  time: string;
+  category: string;
+  league: string;
+  status: string;
+  start_time: string;
+  poster: string;
+  teams: { home: RawTeam; away: RawTeam };
+  page_url: string;
   embed_url: string;
-  streams_available: number;
-  channels: RawChannel[];
+  servers: RawServer[];
 }
 
 export interface RawApiResponse {
-  generated: string;
-  total: number;
+  source: string;
+  updated: string;
+  playlist_updated?: string;
+  count: number;
+  live: number;
+  upcoming: number;
   matches: RawMatch[];
 }
 
@@ -33,16 +44,18 @@ export interface Channel {
 
 export interface NormalizedMatch {
   id: string;
-  day: string;
-  index: number;
   rawTitle: string;
   team1: string;
   team2: string;
   league: string;
+  category: string;
   sport: Sport;
+  status: string;
+  poster: string;
   timeUtc: string;
   isoDateUtc: string;
   embedUrl: string;
+  pageUrl: string;
   channels: Channel[];
   streamsAvailable: number;
   slug: string;
