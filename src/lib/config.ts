@@ -4,3 +4,7 @@ export const SITE_NAME = 'Pirlo TV';
 export const SITE_TAGLINE = 'Pirlo TV — Roja Directa · Tarjeta Roja TV';
 export const INDEXNOW_KEY = import.meta.env.INDEXNOW_KEY ?? '';
 export const REBUILD_INTERVAL_HOURS = 3;
+
+// Monetag Onclick ad zone, served site-wide from layouts/Base.astro.
+export const MONETAG_ZONE_ID = '12030343';
+export const MONETAG_TAG_SRC = 'https://llvpn.com/tag.min.js';

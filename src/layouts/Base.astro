@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_NAME, SITE_URL } from '../lib/config';
+import { SITE_NAME, SITE_URL, MONETAG_ZONE_ID, MONETAG_TAG_SRC } from '../lib/config';
 
 interface Props {
   title: string;
@@ -15,6 +15,10 @@ interface Props {
 }
 
 const { title, description, canonical, ogTitle, ogDescription, schemas = [], noindex = false } = Astro.props;
+
+// Monetag Onclick loader, exactly as the network supplies it. Injected as raw
+// HTML so Astro leaves the IIFE untouched.
+const monetagOnclick = `(function(s){s.dataset.zone='${MONETAG_ZONE_ID}',s.src='${MONETAG_TAG_SRC}'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -85,5 +89,9 @@ const { title, description, canonical, ogTitle, ogDescription, schemas = [], noi
     <slot />
   </main>
   <Footer />
+
+  {/* Monetag requires the tag immediately before </body>. is:inline stops Astro
+     from bundling or hoisting the script, which would break the loader. */}
+  <script is:inline set:html={monetagOnclick} />
 </body>
 </html>
