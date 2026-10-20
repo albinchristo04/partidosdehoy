@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_NAME, SITE_URL, MONETAG_ZONE_ID, MONETAG_TAG_SRC, QUGE5_ZONE_ID, QUGE5_TAG_SRC, CLARITY_PROJECT_ID } from '../lib/config';
+import { SITE_NAME, SITE_URL, CLARITY_PROJECT_ID } from '../lib/config';
 
 interface Props {
   title: string;
@@ -16,9 +16,6 @@ interface Props {
 
 const { title, description, canonical, ogTitle, ogDescription, schemas = [], noindex = false } = Astro.props;
 
-// Monetag Onclick loader, exactly as the network supplies it. Injected as raw
-// HTML so Astro leaves the IIFE untouched.
-const monetagOnclick = `(function(s){s.dataset.zone='${MONETAG_ZONE_ID}',s.src='${MONETAG_TAG_SRC}'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))`;
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -89,16 +86,50 @@ const monetagOnclick = `(function(s){s.dataset.zone='${MONETAG_ZONE_ID}',s.src='
 <body>
   <Nav />
   <main>
+    <div class="ad-unit ad-unit-mobile">
+      <script is:inline>
+        atOptions = {
+          'key': '38136bb892ee9912e842b6e4323640e7',
+          'format': 'iframe',
+          'height': 50,
+          'width': 320,
+          'params': {}
+        };
+      </script>
+      <script is:inline src="https://czernik.org/22/38136bb892ee9912e842b6e4323640e7"></script>
+    </div>
     <slot />
+    <div class="ad-unit ad-unit-rectangle">
+      <script is:inline>
+        atOptions = {
+          'key': '36c9aee5e648ca3f7c34a4392d0b310b',
+          'format': 'iframe',
+          'height': 250,
+          'width': 300,
+          'params': {}
+        };
+      </script>
+      <script is:inline src="https://czernik.org/22/36c9aee5e648ca3f7c34a4392d0b310b"></script>
+    </div>
   </main>
   <Footer />
 
-  {/* Monetag requires the tag immediately before </body>. is:inline stops Astro
-     from bundling or hoisting the script, which would break the loader. */}
-  <script is:inline set:html={monetagOnclick} />
-
-  {/* Second popunder network (quge5). Static external tag; is:inline keeps the
-     src, data-zone and async attributes exactly as the network supplies them. */}
-  <script is:inline src={QUGE5_TAG_SRC} data-zone={QUGE5_ZONE_ID} async data-cfasync="false"></script>
+  <script is:inline data-cfasync="false" src="https://capitalhospitals.org/1/c05f8739758e85600bfeb5f69326d61a"></script>
 </body>
 </html>
+
+<style>
+  .ad-unit {
+    margin: 1rem auto;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .ad-unit-mobile {
+    width: 320px;
+    min-height: 50px;
+  }
+  .ad-unit-rectangle {
+    width: 300px;
+    min-height: 250px;
+  }
+</style>
