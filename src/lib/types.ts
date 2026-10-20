@@ -13,22 +13,30 @@ export interface RawMatch {
   title: string;
   category: string;
   league: string;
-  status: string;
-  start_time: string;
-  poster: string;
-  teams: { home: RawTeam; away: RawTeam };
-  page_url: string;
+  sport?: string;
+  kind?: string;
+  starts_at?: string;
+  ends_at?: string;
+  watch_url?: string;
+  sources?: { label: string; language: string; iframe_url: string }[];
+  player?: { status: string; iframe_url?: string | null };
+  status?: string;
+  start_time?: string;
+  poster?: string;
+  teams?: { home: RawTeam; away: RawTeam };
+  page_url?: string;
   embed_url: string;
-  servers: RawServer[];
+  servers?: RawServer[];
 }
 
 export interface RawApiResponse {
   source: string;
-  updated: string;
+  generated_at?: string;
+  updated?: string;
   playlist_updated?: string;
-  count: number;
-  live: number;
-  upcoming: number;
+  count?: number;
+  live?: number;
+  upcoming?: number;
   matches: RawMatch[];
 }
 

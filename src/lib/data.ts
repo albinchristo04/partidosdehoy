@@ -3,8 +3,8 @@ import { generateSlug, matchSlug } from './slugs';
 import { DATA_URL } from './config';
 
 // Fix mojibake encoding from API (no-op when the string is already valid UTF-8)
-function fixEncoding(str: string): string {
-  if (!str) return str;
+function fixEncoding(str: string | undefined): string {
+  if (!str) return '';
   try {
     return decodeURIComponent(escape(str));
   } catch {
@@ -50,6 +50,11 @@ const LEAGUE_SLUG_MAP: Record<string, string> = {
   'MLB': 'mlb',
   'UFC': 'ufc',
   'MotoGP': 'motogp',
+  'Europe UEFA Champions League': 'champions-league',
+  'Mexico Liga MX': 'liga-mx',
+  'Spain La Liga': 'laliga',
+  'South America Copa Libertadores': 'copa-libertadores',
+  'South America Copa Sudamericana': 'copa-sudamericana',
 };
 
 // Map the new source's `category` + `league` fields onto the site's sport model.
@@ -61,6 +66,18 @@ function inferSport(
 ): { sport: Sport; sportSlug: string; leagueSlug: string } {
   const cat = category.trim();
   const lg = league.trim();
+
+  // v2 categories are machine identifiers; keep broader sports in their own leagues.
+  if (cat === 'soccer') {
+    return { sport: 'futbol', sportSlug: 'futbol', leagueSlug: LEAGUE_SLUG_MAP[lg] ?? generateSlug(lg || 'futbol') };
+  }
+  const categorySports: Record<string, Sport> = { nba: 'nba', nhl: 'nhl', mlb: 'mlb' };
+  if (categorySports[cat]) {
+    const sport = categorySports[cat];
+    return { sport, sportSlug: sport, leagueSlug: sport };
+  }
+  if (cat === 'mma' && /\bUFC\b/i.test(lg)) return { sport: 'ufc', sportSlug: 'ufc', leagueSlug: 'ufc' };
+  if (/\bMotoGP\b/i.test(lg)) return { sport: 'motogp', sportSlug: 'motogp', leagueSlug: 'motogp' };
 
   // Football (soccer) — includes the World Cup special case
   if (cat === 'Football') {
@@ -97,6 +114,12 @@ function parseTitle(title: string): { team1: string; team2: string } {
 
 function parseLangCode(label: string): string {
   const l = label.toUpperCase();
+  const countryLanguages: Record<string, string> = {
+    US: 'en', GB: 'en', CA: 'en', AT: 'de', BE: 'nl', BG: 'bg', CZ: 'cs',
+    DK: 'da', FI: 'fi', GR: 'el', HR: 'hr', HU: 'hu', NO: 'no', PL: 'pl',
+    RO: 'ro', SE: 'sv', SR: 'sr', RS: 'sr',
+  };
+  if (countryLanguages[l]) return countryLanguages[l];
   if (l.startsWith('EN')) return 'en';
   if (l === 'ES') return 'es';
   if (l.startsWith('PT') || l.startsWith('SPORTTV')) return 'pt';
@@ -109,9 +132,9 @@ function parseLangCode(label: string): string {
   return 'en';
 }
 
-// The new source ships a full ISO `start_time`; derive the "HH:MM" UTC string
+// Derive the "HH:MM" UTC string from the source's ISO kickoff timestamp.
 // the components/timezone helpers expect. Falls back to the feed timestamp.
-function timeFromIso(startIso: string, fallbackIso: string): { timeUtc: string; isoDateUtc: string } {
+function timeFromIso(startIso: string | undefined, fallbackIso: string): { timeUtc: string; isoDateUtc: string } {
   const d = startIso ? new Date(startIso) : null;
   if (d && !isNaN(d.getTime())) {
     const hh = String(d.getUTCHours()).padStart(2, '0');
@@ -156,9 +179,23 @@ function normalizeMatch(raw: RawMatch, generated: string): NormalizedMatch {
   const league = fixEncoding(raw.league) || 'Otros';
   const category = fixEncoding(raw.category);
   const { sport, sportSlug, leagueSlug } = inferSport(category, league, team1, team2);
-  const { timeUtc, isoDateUtc } = timeFromIso(raw.start_time, generated);
+  const { timeUtc, isoDateUtc } = timeFromIso(raw.starts_at ?? raw.start_time, generated);
   const slug = team2 ? matchSlug(team1, team2) : generateSlug(team1 || title);
-  const channels = (raw.servers ?? []).map(normalizeServer);
+  const channels: Channel[] = raw.sources
+    ? raw.sources.filter((source) => source.iframe_url).map((source) => ({
+        label: fixEncoding(source.label),
+        langCode: parseLangCode(source.language),
+        embedUrl: source.iframe_url,
+        stableUrl: source.iframe_url,
+        available: true,
+      }))
+    : (raw.servers ?? []).map(normalizeServer);
+  if (!channels.length && raw.player?.iframe_url && raw.player.status === 'available') {
+    channels.push({ label: 'Principal', langCode: 'en', embedUrl: raw.player.iframe_url, stableUrl: raw.player.iframe_url, available: true });
+  }
+  const now = Date.now();
+  const status = raw.status ?? (now < Date.parse(isoDateUtc) ? 'upcoming'
+    : raw.ends_at && now >= Date.parse(raw.ends_at) ? 'finished' : 'live');
 
   return {
     id: raw.id,
@@ -168,12 +205,12 @@ function normalizeMatch(raw: RawMatch, generated: string): NormalizedMatch {
     league,
     category,
     sport,
-    status: fixEncoding(raw.status),
+    status: fixEncoding(status),
     poster: raw.poster ?? '',
     timeUtc,
     isoDateUtc,
     embedUrl: raw.embed_url,
-    pageUrl: raw.page_url ?? '',
+    pageUrl: raw.watch_url ?? raw.page_url ?? '',
     channels,
     streamsAvailable: channels.length,
     slug,
@@ -193,6 +230,7 @@ export async function getMatchData(): Promise<MatchData> {
     const res = await fetch(DATA_URL, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     raw = await res.json() as RawApiResponse;
+    if (!Array.isArray(raw.matches)) throw new Error('Invalid match feed');
   } catch {
     // Fallback to local cache
     try {
@@ -203,11 +241,17 @@ export async function getMatchData(): Promise<MatchData> {
     }
   }
 
-  const generated = raw.updated || new Date().toISOString();
+  const generated = raw.generated_at || raw.updated || new Date().toISOString();
   // "24/7 channel" entries are always-on TV streams, not head-to-head matches.
   const matches = (raw.matches ?? [])
-    .filter((m) => m.league !== '24/7 channel')
+    .filter((m) => m.league !== '24/7 channel' && (!m.kind || m.kind === 'event'))
     .map((m) => normalizeMatch(m, generated));
+
+  const slugCounts = new Map<string, number>();
+  for (const match of matches) slugCounts.set(match.slug, (slugCounts.get(match.slug) ?? 0) + 1);
+  for (const match of matches) {
+    if (slugCounts.get(match.slug)! > 1) match.slug = `${match.slug}-${generateSlug(match.id)}`;
+  }
 
   const bySport: Record<string, NormalizedMatch[]> = {};
   const byLeague: Record<string, NormalizedMatch[]> = {};
