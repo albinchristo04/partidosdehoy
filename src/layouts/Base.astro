@@ -2,7 +2,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { SITE_NAME, SITE_URL, MONETAG_ZONE_ID, MONETAG_TAG_SRC } from '../lib/config';
+import { SITE_NAME, SITE_URL, MONETAG_ZONE_ID, MONETAG_TAG_SRC, QUGE5_ZONE_ID, QUGE5_TAG_SRC, CLARITY_PROJECT_ID } from '../lib/config';
 
 interface Props {
   title: string;
@@ -82,6 +82,9 @@ const monetagOnclick = `(function(s){s.dataset.zone='${MONETAG_ZONE_ID}',s.src='
   {schemas.map((s) => (
     <script type="application/ld+json" set:html={JSON.stringify(s)} />
   ))}
+
+  {/* Microsoft Clarity session analytics; is:inline keeps the vendor snippet untouched. */}
+  <script is:inline set:html={`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i+"?ref=bwt";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");`} />
 </head>
 <body>
   <Nav />
@@ -93,5 +96,9 @@ const monetagOnclick = `(function(s){s.dataset.zone='${MONETAG_ZONE_ID}',s.src='
   {/* Monetag requires the tag immediately before </body>. is:inline stops Astro
      from bundling or hoisting the script, which would break the loader. */}
   <script is:inline set:html={monetagOnclick} />
+
+  {/* Second popunder network (quge5). Static external tag; is:inline keeps the
+     src, data-zone and async attributes exactly as the network supplies them. */}
+  <script is:inline src={QUGE5_TAG_SRC} data-zone={QUGE5_ZONE_ID} async data-cfasync="false"></script>
 </body>
 </html>
